@@ -153,11 +153,12 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
     marker.addListener('click', function() {
       infoWindow.open(map, marker);
     });
-    id += 1;
-    $('#log').append('<p id="message'+id+'" onclick="centerMap({lat:'+data.location.lat+',lng:'+data.location.lng+'});"><span>lat '+data.location.lat+' lng '+data.location.lng+'</span>'+_.unescape(_.escape(data.message)).split('\n').join('</br>')+'</p>')
+
+    $('#log').append('<p id="message'+id+'"onclick="centerMap({lat:'+data.location.lat+',lng:'+data.location.lng+'})"><span>lat '+data.location.lat+' lng '+data.location.lng+'</span>'+_.unescape(_.escape(data.message)).split('\n').join('</br>')+'</p>')
     $('#message'+id).click(function(){
-      infoWindow.open(map, marker);
+      infoWindow.open(map,marker)
     })
+    id+=1;
   }
 
   function centerMap(location){
