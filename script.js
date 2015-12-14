@@ -2,7 +2,7 @@
 // When the user clicks the marker, an info window opens.
 var map, myPos, myMarker, myInfoWindow;
 var myFirebaseRef = new Firebase("https://googlemapmessages.firebaseio.com/");
-
+var mode = "text";
 
 
 function initMap() {
@@ -92,11 +92,31 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
 }
 
 function saveMessage(){
-
+  var pos = myPos
+  if(mode =='text'){
   myFirebaseRef.push({
+    type:'text',
   message: _.escape(document.getElementById('message').value),
-  location: myPos
+  location: pos
 });
+} else {
+  imageData = $('#simple_sketch')[0].toDataURL('image/png').replace(/^data:image\/(png|jpg);base64,/, "");
+  $.ajax({
+    url: 'https://api.imgur.com/3/image',
+    headers: {
+        'Authorization': 'Client-ID a2bb58386e94eb0'
+    },
+    type: 'POST',
+    data: {
+        'image': imageData
+    },
+    success: function(data) { myFirebaseRef.push({
+      type:'image',
+    message: data.data.link,
+    location: pos
+  }); }
+});
+}
 myMarker.setMap(null)
 }
 function draw(){
@@ -104,10 +124,13 @@ function draw(){
   $(function() {
     $('#simple_sketch').sketch();
   });
+  mode = 'draw';
 }
 function text(){
   $('#messageArea').html('<textarea id="message"></textarea><button onclick="saveMessage()">Save</button>')
+  mode = 'text';
 }
+
 function newMessage(data){
   console.log(data)
 
@@ -117,9 +140,16 @@ function newMessage(data){
     animation: google.maps.Animation.DROP,
     icon:'http://i.imgur.com/UYAVMth.png'
   });
+
+  if(data.type == 'text'){
   var infoWindow = new google.maps.InfoWindow({
     content: _.escape(data.message).split('\n').join('</br>')
   });
+} else {
+    var infoWindow = new google.maps.InfoWindow({
+      content: '<img src="'+data.message+'">'
+    });
+  }
   marker.addListener('click', function() {
     infoWindow.open(map, marker);
   });
