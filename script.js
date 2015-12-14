@@ -147,7 +147,7 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
       });
     } else {
       var infoWindow = new google.maps.InfoWindow({
-        content: '<img src="'+data.message+'">'
+        content: '<img src="'+_.escape(data.message)+'">'
       });
     }
     marker.addListener('click', function() {
