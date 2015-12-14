@@ -64,6 +64,7 @@ function initMap() {
 function placeMarker(location) {
   console.log(location)
   myMarker.setMap(null)
+  mode = 'text';
   myPos = {lat:location.lat(), lng:location.lng()};
 
   myMarker = new google.maps.Marker({
@@ -147,7 +148,7 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
 
       });
       $('#log').append('<p id="message'+id+'"onclick="centerMap({lat:'+data.location.lat+',lng:'+data.location.lng+'})"><span>lat '+data.location.lat+' lng '+data.location.lng+'</span>'+_.unescape(_.escape(data.message)).split('\n').join('</br>')+'</p>')
-      
+
     } else {
       var infoWindow = new google.maps.InfoWindow({
         content: '<img src="'+_.escape(data.message)+'">'
