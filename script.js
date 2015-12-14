@@ -3,7 +3,7 @@
 var map, myPos, myMarker, myInfoWindow;
 var myFirebaseRef = new Firebase("https://googlemapmessages.firebaseio.com/");
 var mode = "text";
-
+var id = 0;
 
 function initMap() {
   var center = {lat: -0, lng: 0};
@@ -143,7 +143,7 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
 
     if(data.type != 'image'){
       var infoWindow = new google.maps.InfoWindow({
-        content: _.escape(data.message).split('\n').join('</br>')
+        content: _.unescape(_.escape(data.message)).split('\n').join('</br>')
       });
     } else {
       var infoWindow = new google.maps.InfoWindow({
@@ -153,8 +153,11 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
     marker.addListener('click', function() {
       infoWindow.open(map, marker);
     });
-
-    $('#log').append('<p onclick="centerMap({lat:'+data.location.lat+',lng:'+data.location.lng+'})"><span>lat '+data.location.lat+' lng '+data.location.lng+'</span>'+_.escape(data.message).split('\n').join('</br>')+'</p>')
+    id += 1;
+    $('#log').append('<p id="message'+id+'" onclick="centerMap({lat:'+data.location.lat+',lng:'+data.location.lng+'});"><span>lat '+data.location.lat+' lng '+data.location.lng+'</span>'+_.unescape(_.escape(data.message)).split('\n').join('</br>')+'</p>')
+    $('#message'+id).click(function(){
+      infoWindow.open(map, marker);
+    })
   }
 
   function centerMap(location){
