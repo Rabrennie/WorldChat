@@ -21,33 +21,14 @@ function initMap() {
   // Try HTML5 geolocation.
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
-      myPos = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
+      var tempPos = {
+        lat: function(){return position.coords.latitude},
+        lng: function(){return position.coords.longitude},
       };
+      placeMarker(tempPos)
 
-      myInfowindow.setPosition(myPos);
-      myInfowindow.setContent('<div id="messageTabs"><span style="font-weight: bold;" id="textButton" onclick="text()">Text</span><span id="drawButton" onclick="draw()">Draw</span><div><div id="messageArea"><textarea id="message"></textarea><button onclick="saveMessage()">Save</button><div>');
-      map.setCenter(myPos);
-      myMarker = new google.maps.Marker({
-        position: myPos,
-        map: map,
-      });
-      myInfowindow.open(map,myMarker);
     }, function() {
-      myPos = {
-        lat: map.getCenter().lat(),
-        lng: map.getCenter().lng()
-      };
-
-      myInfowindow.setPosition(myPos);
-      myInfowindow.setContent('<div id="messageTabs"><span style="font-weight: bold;" id="textButton" onclick="text()">Text</span><span id="drawButton" onclick="draw()">Draw</span><div><div id="messageArea"><textarea id="message"></textarea><button onclick="saveMessage()">Save</button><div>');
-      map.setCenter(myPos);
-      myMarker = new google.maps.Marker({
-        position: myPos,
-        map: map,
-      });
-      myInfowindow.open(map,myMarker);
+      placeMarker(map.getCenter())
     });
   } else {
     // Browser doesn't support Geolocation
@@ -60,7 +41,6 @@ function initMap() {
   });
 
   myFirebaseRef.on("child_added", function(snapshot) {
-    console.log(snapshot.val());
     newMessage(snapshot.val());
   }, function (errorObject) {
     console.log("The read failed: " + errorObject.code);
@@ -68,19 +48,25 @@ function initMap() {
 }
 
 function placeMarker(location) {
-  console.log(location)
-  myMarker.setMap(null)
-  mode = 'text';
   myPos = {lat:location.lat(), lng:location.lng()};
 
-  myMarker = new google.maps.Marker({
-    position: myPos,
-    map: map,
-  });
-  myInfowindow = new google.maps.InfoWindow({
-    content: '<div id="messageTabs"><span style="font-weight: bold;" id="textButton" onclick="text()">Text</span><span id="drawButton" onclick="draw()">Draw</span><div><div id="messageArea"><textarea id="message"></textarea><button onclick="saveMessage()">Save</button><div>'
-  });
-  myInfowindow.open(map,myMarker);
+  if (myMarker == undefined) {
+    mode = 'text';
+
+    myMarker = new google.maps.Marker({
+      position: myPos,
+      map: map,
+    });
+    myInfowindow = new google.maps.InfoWindow({
+      content: '<div id="messageTabs"><span style="font-weight: bold;" id="textButton" onclick="text()">Text</span><span id="drawButton" onclick="draw()">Draw</span><div><div id="messageArea"><textarea id="message"></textarea><button onclick="saveMessage()">Save</button><div>'
+    });
+    myInfowindow.open(map,myMarker);
+
+  } else {
+    myMarker.setPosition(myPos)
+
+  }
+
   document.getElementById('message').focus()
 
   myMarker.addListener('click', function() {
@@ -97,89 +83,91 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
   infoWindow.setContent(browserHasGeolocation ?
     'Error: The Geolocation service failed.' :
     'Error: Your browser doesn\'t support geolocation.');
-  }
+}
 
-  function saveMessage(){
-    var pos = myPos
-    if(mode =='text'){
-      myFirebaseRef.push({
-        type:'text',
-        message: _.escape(document.getElementById('message').value),
+function saveMessage(){
+  var pos = myPos
+  if(mode =='text'){
+    myFirebaseRef.push({
+      type:'text',
+      message: _.escape(document.getElementById('message').value),
+      location: pos
+    });
+  } else {
+    imageData = $('#simple_sketch')[0].toDataURL('image/png').replace(/^data:image\/(png|jpg);base64,/, "");
+    $.ajax({
+      url: 'https://api.imgur.com/3/image',
+      headers: {
+        'Authorization': 'Client-ID a2bb58386e94eb0'
+      },
+      type: 'POST',
+      data: {
+        'image': imageData
+      },
+      success: function(data) { myFirebaseRef.push({
+        type:'image',
+        message: data.data.link,
         location: pos
-      });
-    } else {
-      imageData = $('#simple_sketch')[0].toDataURL('image/png').replace(/^data:image\/(png|jpg);base64,/, "");
-      $.ajax({
-        url: 'https://api.imgur.com/3/image',
-        headers: {
-          'Authorization': 'Client-ID a2bb58386e94eb0'
-        },
-        type: 'POST',
-        data: {
-          'image': imageData
-        },
-        success: function(data) { myFirebaseRef.push({
-          type:'image',
-          message: data.data.link,
-          location: pos
-        }); }
-      });
-    }
-    myMarker.setMap(null)
-  }
-  function draw(){
-    $('#messageArea').html('<canvas id="simple_sketch" width="300" height="100"></canvas><button onclick="saveMessage()">Save</button>')
-    $(function() {
-      $('#simple_sketch').sketch();
+      }); }
     });
-    mode = 'draw';
-    $('#textButton').css('font-weight','normal')
-
-    $('#drawButton').css('font-weight','bold')
   }
-  function text(){
-    $('#messageArea').html('<textarea id="message"></textarea><button onclick="saveMessage()">Save</button>')
-    mode = 'text';
-    $('#textButton').css('font-weight','bold')
-    $('#drawButton').css('font-weight','normal')
-  }
+  myMarker.setMap(null)
+}
 
-  function newMessage(data){
-    console.log(data)
+function draw(){
+  $('#messageArea').html('<canvas id="simple_sketch" width="300" height="100"></canvas><button onclick="saveMessage()">Save</button>')
+  $(function() {
+    $('#simple_sketch').sketch();
+  });
+  mode = 'draw';
+  $('#textButton').css('font-weight','normal')
 
-    var marker = new google.maps.Marker({
-      position: data.location,
-      map: map,
-      animation: google.maps.Animation.DROP,
-      icon:'http://i.imgur.com/UYAVMth.png'
+  $('#drawButton').css('font-weight','bold')
+}
+
+function text(){
+  $('#messageArea').html('<textarea id="message"></textarea><button onclick="saveMessage()">Save</button>')
+  mode = 'text';
+  $('#textButton').css('font-weight','bold')
+  $('#drawButton').css('font-weight','normal')
+}
+
+function newMessage(data){
+  console.log(data)
+
+  var marker = new google.maps.Marker({
+    position: data.location,
+    map: map,
+    animation: google.maps.Animation.DROP,
+    icon:'http://i.imgur.com/UYAVMth.png'
+  });
+
+  if(data.type != 'image'){
+    var infoWindow = new google.maps.InfoWindow({
+      content: _.unescape(_.escape(data.message)).split('\n').join('</br>')
+
     });
+    $('#log').append('<p id="message'+id+'"onclick="centerMap({lat:'+data.location.lat+',lng:'+data.location.lng+'})"><span>lat '+data.location.lat+' lng '+data.location.lng+'</span>'+_.unescape(_.escape(data.message)).split('\n').join('</br>')+'</p>')
 
-    if(data.type != 'image'){
-      var infoWindow = new google.maps.InfoWindow({
-        content: _.unescape(_.escape(data.message)).split('\n').join('</br>')
-
-      });
-      $('#log').append('<p id="message'+id+'"onclick="centerMap({lat:'+data.location.lat+',lng:'+data.location.lng+'})"><span>lat '+data.location.lat+' lng '+data.location.lng+'</span>'+_.unescape(_.escape(data.message)).split('\n').join('</br>')+'</p>')
-
-    } else {
-      var infoWindow = new google.maps.InfoWindow({
-        content: '<img src="'+_.escape(data.message)+'">'
-      });
-      $('#log').append('<p id="message'+id+'"onclick="centerMap({lat:'+data.location.lat+',lng:'+data.location.lng+'})"><span>lat '+data.location.lat+' lng '+data.location.lng+'</span><img src="'+_.unescape(_.escape(data.message))+'"></p>')
-
-    }
-    marker.addListener('click', function() {
-      infoWindow.open(map, marker);
+  } else {
+    var infoWindow = new google.maps.InfoWindow({
+      content: '<img src="'+_.escape(data.message)+'">'
     });
+    $('#log').append('<p id="message'+id+'"onclick="centerMap({lat:'+data.location.lat+',lng:'+data.location.lng+'})"><span>lat '+data.location.lat+' lng '+data.location.lng+'</span><img src="'+_.unescape(_.escape(data.message))+'"></p>')
 
-    $('#message'+id).click(function(){
-      infoWindow.open(map,marker)
-    })
-    id+=1;
-
-    $('#log').scrollTop($('#log')[0].scrollHeight)
   }
+  marker.addListener('click', function() {
+    infoWindow.open(map, marker);
+  });
 
-  function centerMap(location){
-    map.setCenter(location);
-  }
+  $('#message'+id).click(function(){
+    infoWindow.open(map,marker)
+  })
+  id+=1;
+
+  $('#log').scrollTop($('#log')[0].scrollHeight)
+}
+
+function centerMap(location){
+  map.setCenter(location);
+}
