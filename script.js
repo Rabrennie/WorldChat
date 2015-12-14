@@ -27,16 +27,13 @@ function initMap() {
       };
 
       myInfowindow.setPosition(myPos);
-      myInfowindow.setContent('<div id="messageTabs"><span id="textButton" onclick="text()">Text</span><span id="drawButton" onclick="draw()">Draw</span><div><div id="messageArea"><textarea id="message"></textarea><button onclick="saveMessage()">Save</button><div>');
+      myInfowindow.setContent('<div id="messageTabs"><span style="font-weight: bold;" id="textButton" onclick="text()">Text</span><span id="drawButton" onclick="draw()">Draw</span><div><div id="messageArea"><textarea id="message"></textarea><button onclick="saveMessage()">Save</button><div>');
       map.setCenter(myPos);
       myMarker = new google.maps.Marker({
         position: myPos,
         map: map,
       });
       myInfowindow.open(map,myMarker);
-
-
-
     }, function() {
       myPos = {
         lat: map.getCenter().lat(),
@@ -44,7 +41,7 @@ function initMap() {
       };
 
       myInfowindow.setPosition(myPos);
-      myInfowindow.setContent('<div id="messageTabs"><span id="textButton" onclick="text()">Text</span><span id="drawButton" onclick="draw()">Draw</span><div><div id="messageArea"><textarea id="message"></textarea><button onclick="saveMessage()">Save</button><div>');
+      myInfowindow.setContent('<div id="messageTabs"><span style="font-weight: bold;" id="textButton" onclick="text()">Text</span><span id="drawButton" onclick="draw()">Draw</span><div><div id="messageArea"><textarea id="message"></textarea><button onclick="saveMessage()">Save</button><div>');
       map.setCenter(myPos);
       myMarker = new google.maps.Marker({
         position: myPos,
@@ -56,9 +53,6 @@ function initMap() {
     // Browser doesn't support Geolocation
     handleLocationError(false, myInfowindow, map.getCenter());
   }
-
-
-
 
 
   google.maps.event.addListener(map, 'click', function(event) {
@@ -84,7 +78,7 @@ function placeMarker(location) {
     map: map,
   });
   myInfowindow = new google.maps.InfoWindow({
-    content: '<div id="messageTabs"><span id="textButton" onclick="text()">Text</span><span id="drawButton" onclick="draw()">Draw</span><div><div id="messageArea"><textarea id="message"></textarea><button onclick="saveMessage()">Save</button><div>'
+    content: '<div id="messageTabs"><span style="font-weight: bold;" id="textButton" onclick="text()">Text</span><span id="drawButton" onclick="draw()">Draw</span><div><div id="messageArea"><textarea id="message"></textarea><button onclick="saveMessage()">Save</button><div>'
   });
   myInfowindow.open(map,myMarker);
   document.getElementById('message').focus()
@@ -93,6 +87,7 @@ function placeMarker(location) {
     myInfowindow.open(map,myMarker);
     document.getElementById('message').focus()
   });
+
 }
 
 
@@ -138,10 +133,15 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
       $('#simple_sketch').sketch();
     });
     mode = 'draw';
+    $('#textButton').css('font-weight','normal')
+
+    $('#drawButton').css('font-weight','bold')
   }
   function text(){
     $('#messageArea').html('<textarea id="message"></textarea><button onclick="saveMessage()">Save</button>')
     mode = 'text';
+    $('#textButton').css('font-weight','bold')
+    $('#drawButton').css('font-weight','normal')
   }
 
   function newMessage(data){
