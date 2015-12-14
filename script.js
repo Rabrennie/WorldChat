@@ -144,17 +144,21 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
     if(data.type != 'image'){
       var infoWindow = new google.maps.InfoWindow({
         content: _.unescape(_.escape(data.message)).split('\n').join('</br>')
+
       });
+      $('#log').append('<p id="message'+id+'"onclick="centerMap({lat:'+data.location.lat+',lng:'+data.location.lng+'})"><span>lat '+data.location.lat+' lng '+data.location.lng+'</span>'+_.unescape(_.escape(data.message)).split('\n').join('</br>')+'</p>')
+      
     } else {
       var infoWindow = new google.maps.InfoWindow({
         content: '<img src="'+_.escape(data.message)+'">'
       });
+      $('#log').append('<p id="message'+id+'"onclick="centerMap({lat:'+data.location.lat+',lng:'+data.location.lng+'})"><span>lat '+data.location.lat+' lng '+data.location.lng+'</span><img src="'+_.unescape(_.escape(data.message))+'"></p>')
+
     }
     marker.addListener('click', function() {
       infoWindow.open(map, marker);
     });
 
-    $('#log').append('<p id="message'+id+'"onclick="centerMap({lat:'+data.location.lat+',lng:'+data.location.lng+'})"><span>lat '+data.location.lat+' lng '+data.location.lng+'</span>'+_.unescape(_.escape(data.message)).split('\n').join('</br>')+'</p>')
     $('#message'+id).click(function(){
       infoWindow.open(map,marker)
     })
