@@ -176,6 +176,8 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
       infoWindow.open(map,marker)
     })
     id+=1;
+
+    $('#log').scrollTop($('#log')[0].scrollHeight)
   }
 
   function centerMap(location){
