@@ -38,7 +38,19 @@ function initMap() {
 
 
     }, function() {
-      handleLocationError(true, myInfowindow, map.getCenter());
+      myPos = {
+        lat: map.getCenter().lat(),
+        lng: map.getCenter().lng()
+      };
+
+      myInfowindow.setPosition(myPos);
+      myInfowindow.setContent('<div id="messageTabs"><span id="textButton" onclick="text()">Text</span><span id="drawButton" onclick="draw()">Draw</span><div><div id="messageArea"><textarea id="message"></textarea><button onclick="saveMessage()">Save</button><div>');
+      map.setCenter(myPos);
+      myMarker = new google.maps.Marker({
+        position: myPos,
+        map: map,
+      });
+      myInfowindow.open(map,myMarker);
     });
   } else {
     // Browser doesn't support Geolocation
