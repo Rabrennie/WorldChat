@@ -15,7 +15,6 @@ function initMap() {
     minZoom: 2
   });
 
-  myInfowindow = new google.maps.InfoWindow({map: map});
 
   myPos = {lat:0,lng:0};
   // Try HTML5 geolocation.
