@@ -143,11 +143,13 @@ function newMessage(data){
   });
 
   if(data.type != 'image'){
+    message = _.remove(_.unescape(_.escape(data.message)).split("\n"), function(str){return str}).join("<br>");
+    console.log(message)
     var infoWindow = new google.maps.InfoWindow({
-      content: _.unescape(_.escape(data.message)).split('\n').join('</br>')
+      content: message
 
     });
-    $('#log').append('<p id="message'+id+'"onclick="centerMap({lat:'+data.location.lat+',lng:'+data.location.lng+'})"><span>lat '+data.location.lat+' lng '+data.location.lng+'</span>'+_.unescape(_.escape(data.message)).split('\n').join('</br>')+'</p>')
+    $('#log').append('<p id="message'+id+'"onclick="centerMap({lat:'+data.location.lat+',lng:'+data.location.lng+'})"><span>lat '+data.location.lat+' lng '+data.location.lng+'</span>'+message+'</p>')
 
   } else {
     var infoWindow = new google.maps.InfoWindow({
