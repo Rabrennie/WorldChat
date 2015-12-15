@@ -60,12 +60,14 @@ function placeMarker(location) {
     myInfowindow = new google.maps.InfoWindow({
       content: '<div id="messageTabs"><span style="font-weight: bold;" id="textButton" onclick="text()">Text</span><span id="drawButton" onclick="draw()">Draw</span><div><div id="messageArea"><textarea id="message"></textarea><button onclick="saveMessage()">Save</button><div>'
     });
-    myInfowindow.open(map,myMarker);
+
 
   } else {
     myMarker.setPosition(myPos)
 
   }
+
+  myInfowindow.open(map,myMarker);
 
   document.getElementById('message').focus()
 
@@ -111,7 +113,7 @@ function saveMessage(){
       }); }
     });
   }
-  myMarker.setMap(null)
+  myInfowindow.close(map,myMarker);
 }
 
 function draw(){
@@ -144,7 +146,6 @@ function newMessage(data){
 
   if(data.type != 'image'){
     message = _.remove(_.unescape(_.escape(data.message)).split("\n"), function(str){return str}).join("<br>");
-    console.log(message)
     var infoWindow = new google.maps.InfoWindow({
       content: message
 
