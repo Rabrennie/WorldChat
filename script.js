@@ -112,6 +112,7 @@ function saveMessage(){
       }); }
     });
   }
+  text();
   myInfowindow.close(map,myMarker);
 }
 
